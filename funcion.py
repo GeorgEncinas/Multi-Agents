@@ -1,13 +1,15 @@
 '''Donde g = grados y v = velocidad'''
 
-def ai(g, v):
-    if(g>=0):
-        p = ((g/90)*40/2)
-        A = [v, p, -v, p]
+def ai(grades, speed):
+    if(grades>=0):
+        points = ((grades/90)*40/2)
+        return "$A,"+str(speed) + "," + str(points) + "," + str(-speed) + "," + str(points)
+    #    cant_encoders = [speed, points, -speed, points]
     else:
-        g = -1 *g
-        p = ((g/90)*40/2)
-        A = [-v, p, v, p]
-    print(str(A))
+        grades = -1 *grades
+        points = ((grades/90)*40/2)
+        return "$A,"+str(-speed) + "," + str(points) + "," + str(speed) + "," + str(points)
+    #    cant_encoders = [-speed points, speed, points]
+    #print(str(cant_encoders))
 
-ai(270, 20)
+#ai(270, 20)
