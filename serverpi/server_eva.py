@@ -1,31 +1,42 @@
 #!/usr/bin/python2.7
-import bluetooth
+#import bluetooth
 import socket
 import time
+import serial
 
-host = "192.168.1.119"
+host = "192.168.1.205"
+#host = "localhost"
 bt_address = '20:13:05:15:05:44'
 port = 1
+"""
+ser = serial.Serial(
+	port='/dev/ttyAMA0',
+	baudrate = 9600,
+	parity=serial.PARITY_NONE,
+	stopbits=serial.STOPBITS_ONE,
+	bytesize=serial.EIGHTBITS,
+	timeout=1
+)
+"""
 
+ser = serial.Serial(port='/dev/ttyUSB0',baudrate=38400)
+print "Serial Connected"
+
+"""
 blue_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 blue_sock.connect((bt_address,port))
 print "connected"
+"""
 
 def procesar_mensaje(msg):
     if msg == "AA":
-        blue_sock.send("$A,25,40,25,40\r\n")
+        ser.write("$A,35,60,35,60\r\n")
     elif msg == "BB":
-        blue_sock.send("BB")
-        time.sleep(1)
-        res = blue_sock.recv(1024)
-        time.sleep(1)
-        client.send(res)
+        ser.write("$A,-35,60,-35,60\r\n")
     elif msg == "DD":
-        blue_sock.send("DD")
-        time.sleep(1)
-        res = blue_sock.recv(1024)
-        time.sleep(1)
-        client.send(res)
+		ser.write("$A,-20,20,20,20\r\n")
+    elif msg == "DD2":
+		ser.write("$A,-20,40,20,40\r\n")
     elif msg == "DIST":
         blue_sock.send("DIST")
         time.sleep(1)
@@ -33,15 +44,13 @@ def procesar_mensaje(msg):
         time.sleep(1)
         client.send(dist)
     elif msg == "CC":
-        blue_sock.send("CC")
-        time.sleep(1)
-        res = blue_sock.recv(1024)
-        time.sleep(1)
-        client.send(res)
+		ser.write("$A,20,20,-20,20\r\n")
+    elif msg == "CC2":
+		ser.write("$A,20,40,-20,40\r\n")
     elif msg == "EE":
-        blue_sock.send("$P,0\r\n")
+        ser.write("$P,0\r\n")
     elif msg == "FF":
-        blue_sock.send("$P,1\r\n")
+        ser.write("$P,1\r\n")
     elif msg == "SS":
         blue_sock.send("SS")
         time.sleep(1)
@@ -60,6 +69,8 @@ def procesar_mensaje(msg):
         res = blue_sock.recv(1024)
         time.sleep(1)
         client.send(res)
+    elif msg == "PP":
+        ser.write("$A,10,10,10,10\r\n")
 
 
 server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
