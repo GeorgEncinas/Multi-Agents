@@ -63,6 +63,7 @@ class DetectorColoresFormas():
             imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
             mascara = cv2.inRange(imagen, self.verde_bajos, self.verde_altos)
             mascara = self.eliminar_ruido(mascara)
+        cv2.imshow(color, mascara)
         return mascara
 
     def eliminar_ruido(self, mascara):
@@ -126,6 +127,12 @@ class DetectorColoresFormas():
         grados = np.degrees(angulo)
         return abs(grados)
 
+    def get_distancia(self, imagen, x1, y1):
+        tam_y, tam_x = np.size(imagen, 0), np.size(imagen, 1)
+        x2, y2 = tam_x / 2, tam_y - 1
+        distancia = math.sqrt((math.pow((x1 - x2), 2) + (math.pow((y1 - y2), 2))))
+        return distancia
+
     def get_angulo_punto(self, imagen, x, y):
         tam_y, tam_x = np.size(imagen, 0), np.size(imagen, 1)
         cx, cy = tam_x/2, tam_y-1
@@ -133,6 +140,28 @@ class DetectorColoresFormas():
         angulo = math.atan2(y - cy, x - cx)
         angulo = math.degrees(angulo) * (-1)
         return int(angulo)-90
+
+    def get_objetivo(self, img, formas):
+        xres, yres = None, None
+        angulo, dist = None, None
+        for a in formas:
+            (x, y) = a
+            if angulo is None:
+                angulo = detector.get_angulo_punto(img, x, y)
+                dist = detector.get_distancia(img, x, y)
+                xres = x
+                yres = y
+            else:
+                angulo1 = detector.get_angulo_punto(img, x, y)
+                dist1 = detector.get_distancia(img, x, y)
+
+                print(str(dist1))
+                if dist1 < dist:
+                    angulo = angulo1
+                    dist = dist1
+                    xres = x
+                    yres = y
+        return angulo, dist, xres, yres
 
 img = cv2.imread("C:\\Users\\Portatil\\Documents\\Universidad\\Materias\\AgentesInteligentes\\Imagens\\temp\\30cm\\14-33-38.jpg")
 img = cv2.resize(img, (640, 480))
@@ -148,12 +177,11 @@ res = detector.detectar_color(img, "blue")
 #res = detector.detectar_color_forma(img, "red", "cuadrado")
 #res = detector.detectar_color_forma(img, "red", "circulo")
 
-print(str(len(res)))
-
-for a in res:
-    (x, y) = a
-    angulo = detector.get_angulo_punto(img, x, y)
+'''obtiene el angulo de la distancia menor al un objetivo'''
+angulo, dist, x, y = detector.get_objetivo(img, res)
+print (str(angulo)+" "+str(dist)+" "+str(x)+" "+str(y))
+if (angulo is not None and x is not None):
     cv2.circle(img, (x, y), 2, (255, 0, 200), thickness=2)
-    cv2.putText(img, str(angulo), (x, y), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.4, (0, 0, 0))
+    cv2.putText(img, str(angulo)+" "+str(dist), (x, y), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.4, (0, 0, 0))
 cv2.imshow("Resultado", img)
 cv2.waitKey(0)
