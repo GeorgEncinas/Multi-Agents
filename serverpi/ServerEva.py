@@ -41,6 +41,7 @@ class ServerEva:
 
 
     def processMessage(self,msg):
+        print msg
         if msg == "AA":
             self.serial.write("$A,35,60,35,60\r\n")
         elif msg == "BB":
@@ -73,4 +74,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
