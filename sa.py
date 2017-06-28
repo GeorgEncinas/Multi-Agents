@@ -6,15 +6,21 @@ class GrillaPos:
 		self.x=0
 		self.y=0
 		
-	def lista_objetos(self, img):
+	def lista_objetos(self, img, color, obje=None):
 		dpos = contorno.Posicionamiento()
-		listaPosObjetos = dpos.get_contornos(img,'blanco')
-		return listaPosObjetos
-	
-	def pos_ocupadas (self, img):
+		if obje is not None:
+			listaPosObjetos1 = dpos.get_contornos(img,'red')
+			listaPosObjetos2 = dpos.get_contornos(img,'blue')
+			lista_final = np.concatenate([listaPosObjetos1,listaPosObjetos2])
+			return lista_final
+		else :
+				
+			listaPosObjetos = dpos.get_contornos(img, color)
+			return listaPosObjetos		
+	def pos_ocupadas (self, obj):
 
 		pos_oc =[];
-		objetos = d.lista_objetos(img)
+		objetos = obj
 		for ob in objetos:
 			i = 0
 			w = 0
@@ -42,28 +48,41 @@ class GrillaPos:
 				
 		return pos_oc
 	#lista de pixeles cx cy de objetos mision 
-	def pos_mision (self, pos, img):
-		i = 0
-		j = 0
-		q = 0
-		w = 0
-		lista_pos_obmision = []
-		for ob in pos:
-			while i < 16:
-				while j < 12:
-					if pos[q,w][1] > (j*40) and pos[q,w][1] < (j*40)+40 :
-						if pos[q,w][0] > (i*40) and pos[q,w][0] < (i*40)+40 :
-							lista_pos_obmision.append([pos[q,w]],[i,j])
-							j=j+1
-							q=q+1
+	
+	def mejor_mision(self, auto, pos_ob):
+		x=16
+		y=12
+		mision = []
+		ganador = []
+		po = pos_ob
+		ganadores =[]
+		while len(po)>0:
+			while mision in po:
+				if mision[0]<auto[0]:
+					if mision[1]<auto[1]:
+						if x>auto[0]-mision[0] and y>auto[1]-mision[1]:
+							x = auto[0]-mision[0]
+							y = auto[1]-mision[1]
+							ganador = mision
 					else:
-						j=j+1
-						q=q+1
-				w=w+1
-		return pos_oc
-		
-		
-		 
+						if x > auto[0]-mision[0] and y > mision[1]-auto[1]:
+							x = auto[0]-mision[0]
+							y = mision[1]-auto[1]
+							ganador = mision
+				else:
+					if mision[1]<auto[1]:
+						if x > mision[0]-auto[0] and y > auto[1]-mision[1]:
+							x = mision[0]-auto[0]
+							y = auto[1]-mision[1]
+							ganador = mision
+					else :
+						if x > mision[0]-auto[0] and y > mision[1]-auto[1]:
+							x = mision[0]-auto[0]
+							y = mision[1]-auto[1] 
+							ganador = mision
+				ganadores.append(ganador)
+				po.remove(ganador)
+		return ganadores
 						
 				
 # Create a black image
@@ -73,26 +92,15 @@ class GrillaPos:
 
 
 d = GrillaPos()
-r = contorno.Posicionamiento()
 
-
-img = cv2.imread("img4.jpg")
+img = cv2.imread("img13.jpg")
 img = cv2.resize(img,(640,480))
-pos_mis = r.get_contornos(img,'blue')
 #print pos_mis
-pos_oc = d.pos_ocupadas(img)
-print pos_oc
-x=0
-y=0
-while x < 640 :
-	cv2.line(img,(x,0),(x,640),(255,0,0),1)
-	x=x+40
-	
-while y < 480 :
-	cv2.line(img,(0,y),(640,y),(255,0,0),1)
-	y=y+40
-	
-#Display the image
-cv2.imshow("img",img)
+objetoss = d.lista_objetos(img,"blue")
+#ubucacion en grilla
+pos_oc = d.pos_ocupadas(objetoss)
+# mejor poscision con el auto
+#pos_con_auto = d.mejor_mision([8,0],pos_oc)
 
-cv2.waitKey(0)
+print pos_oc
+
